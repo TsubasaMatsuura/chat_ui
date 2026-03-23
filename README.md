@@ -1,84 +1,68 @@
-# 入居者サポートAI — Demo UI
+# 入居者サポートAI — UI Demo
 
-チャット形式で Agent SDK をローカル実行するデモ環境です。
+Agent SDK をローカルで動作させ、チャット形式で会話できるデモアプリケーションです。
+（会話履歴の保持、ルーターの文脈分離など実運用を想定した挙動になっています）
 
-## ディレクトリ構成
-```
-demo_ui/
-├── app.py              # Flask サーバー（会話履歴管理・ルーティング）
-├── main.py             # ← ここに SDK の main.py をコピーする
-├── requirements.txt
-├── .env                # ← .env.example をコピーして作成
-├── templates/
-│   └── index.html
-└── static/
-    ├── style.css
-    └── app.js
-```
+## 📦 初期設定の手順
 
-## セットアップ
+このリポジトリを `clone` して最初に動かすためのセットアップ手順です。
 
-### 1. main.py を配置する
+### 1. リポジトリのクローン
 ```bash
-cp /path/to/your/main.py /Users/matsuuratsubasa/Antigravity/demo_ui/main.py
-# または tenant_chat_ai から
-cp ../tenant_chat_ai/main.py ./main.py
+git clone https://github.com/TsubasaMatsuura/chat_ui.git
+cd chat_ui
 ```
 
-### 2. .env を作成する
+### 2. `main.py` の配置
+SDKのエージェント設定ファイルである `main.py` はリポジトリに含まれていません。
+ご自身の `main.py` を本ディレクトリ直下（`app.py` と同じ階層）にコピーして配置してください。
+
+※ `main.py` には以下の変数が定義されている必要があります：
+- `tenant_support_runner` （入居者対応エージェント）
+- `router_runner` （ルーターエージェント）
+- `output` （出力エージェント）
+
+### 3. 環境変数の設定
+APIの認証情報を設定するために `.env` ファイルを作成します。
 ```bash
-cp .env.example .env
-# .env を編集して OPENAI_API_KEY を設定
+touch .env
 ```
+作成した `.env` ファイルに、以下の内容を記述して保存してください：
+```env
+OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxx
+SECRET_KEY=demo-secret-key-change-me
+```
+*※ `OPENAI_API_KEY` には有効な OpenAI のキーを設定してください。*
 
-### 3. 依存パッケージをインストール
-既存の tenant_chat_ai の venv を使う場合（推奨）:
+### 4. 仮想環境の作成と依存ライブラリのインストール
+Python の仮想環境（venv）を作成し、必要なライブラリをインストールします。
+
 ```bash
-../tenant_chat_ai/venv/bin/pip install flask python-dotenv
+# 仮想環境の作成
+python -m venv venv
+
+# 仮想環境のアクティベート（Mac/Linux の場合）
+source venv/bin/activate
+# ※ Windows の場合は: .\venv\Scripts\activate
+
+# ライブラリのインストール
+pip install -r requirements.txt
+pip install openai-agents pydantic python-dotenv
 ```
 
-または新しい venv を作る場合:
+### 5. アプリケーションの起動
+セットアップが完了したら、サーバーを起動します。
+
 ```bash
-python3 -m venv venv
-./venv/bin/pip install -r requirements.txt
-# さらに tenant_chat_ai と同じパッケージも必要
-./venv/bin/pip install openai-agents pydantic python-dotenv
+python app.py
 ```
 
-### 4. サーバーを起動する
-```bash
-# tenant_chat_ai の venv を使う場合
-../tenant_chat_ai/venv/bin/python app.py
+### 6. デモ画面へのアクセス
+起動後、ブラウザで以下のURLにアクセスしてください：
+👉 http://localhost:5050
 
-# または自前 venv の場合
-./venv/bin/python app.py
-```
 
-### 5. ブラウザでアクセス
-```
-http://localhost:5050
-```
-
-## 機能
-
-| 機能 | 説明 |
-|------|------|
-| テキスト入力 | 自由テキストを送信（Enter で送信） |
-| ボタン選択 | AI が出した選択肢をクリックすると自動送信 |
-| 会話履歴保持 | セッション内で history を維持（ループ防止） |
-| Router 分離 | router の出力を user history に混入させない改善済み |
-| リセット | ヘッダーの「リセット」ボタンで会話をクリア |
-
-## main.py の要件
-
-demo_ui/app.py は以下を import します。main.py に定義されている必要があります：
-
-```python
-tenant_support_runner  # 入居者対応エージェント
-router_runner          # ルーターエージェント
-output                 # 出力エージェント
-```
-
-## ポート変更
-
-`app.py` 最終行の `port=5050` を変更してください。
+## 💡 特徴
+- **文脈（会話履歴）の維持**: ユーザーの入力とアシスタントの応答をバックエンドで保持し、ループ現象を防止。
+- **UI コンポーネント化**: Assistantが返す `text` の表示と、`button` 配列を活用した選択肢クリック送信。
+- **ルーターの分離**: RouterAgentの出力JSONがメインの会話文脈に混入しないよう別スコープで処理。

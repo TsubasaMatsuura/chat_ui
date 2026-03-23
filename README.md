@@ -32,7 +32,9 @@ touch .env
 OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxx
 SECRET_KEY=demo-secret-key-change-me
 ```
-*※ `OPENAI_API_KEY` には有効な OpenAI のキーを設定してください。*
+
+- **OPENAI_API_KEY**: 有効な OpenAI API キーを設定してください。
+- **SECRET_KEY**: Webサイトのセッション（ログインや履歴の一次保存）を暗号化するための合言葉です。任意の長いランダムな文字列を設定してください。
 
 ### 4. 仮想環境の作成と依存ライブラリのインストール
 Python の仮想環境（venv）を作成し、必要なライブラリをインストールします。
@@ -47,7 +49,7 @@ source venv/bin/activate
 
 # ライブラリのインストール
 pip install -r requirements.txt
-pip install openai-agents pydantic python-dotenv
+pip install openai-agents pydantic python-dotenv flask
 ```
 
 ### 5. アプリケーションの起動
